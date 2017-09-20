@@ -2,6 +2,12 @@
 
 Yet Another Utilities for Chainer
 
+# Installation
+
+```
+pip install git+https://github.com/yasuyuky/chainer-ya-utils
+```
+
 # Usage
 
 ```python
