@@ -80,5 +80,5 @@ class ArgumentBackup(extension.Extension):
             if not os.path.exists(self.backupdir):
                 os.makedirs(self.backupdir)
             args_dict = vars(self.args)
-            args = {k:args_dict[k] for k in args_dict if k not in ['func']}
+            args = {k:args_dict[k] for k in args_dict}
             json.dump(args, f)
