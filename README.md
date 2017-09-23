@@ -43,7 +43,7 @@ train_set: 7000, eval_set: 3000
 <-- End: creating iterator
 ```
 
-## Trainer Extensions ( SourceBackup / ArgumentBackup / FinalRequest )
+## Trainer Extensions ( SourceBackup / ArgumentBackup / FinalRequest / SlackPost )
 
 - SourceBackup: backups source code automatically.
 - ArgumentBackup: backups argparse result.
@@ -63,6 +63,9 @@ def train(args):
         trainer.extend(extensions.LogReport())
         trainer.extend(SourceBackup())
         trainer.extend(ArgumentBackup(args))
+        token = "YOUR_SLACK_TOKEN"
+        channel = "YOUR_CHANNEL"
+        trainer.extend(SlackPost(token, channel))
         url = "https://example.com/webhook"
         trainer.extend(FinalRequest(url, data={"msg": "training finished"}))
     ...
