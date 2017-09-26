@@ -1,18 +1,26 @@
 import logging
 
-logger = logging.getLogger()
-logger.setLevel(getattr(logging, 'INFO'))
-logger.addHandler(logging.StreamHandler())
-
 
 class rangelog:
+    logger = None
+
+    @classmethod
+    def set_logger(cls, logger=None):
+        if logger is None:
+            cls.logger = logging.getLogger()
+            cls.logger.setLevel(getattr(logging, 'INFO'))
+            cls.logger.addHandler(logging.StreamHandler())
+        elif isinstance(logger, logging.Logger):
+            cls.logger = logger
 
     def __init__(self, name):
+        if rangelog.logger is None:
+            rangelog.set_logger()
         self.name = name
 
     def __enter__(self):
-        logger.info("--> Start: {}".format(self.name))
-        return logger
+        rangelog.logger.info("--> Start: {}".format(self.name))
+        return rangelog.logger
 
     def __exit__(self, *args):
-        logger.info("<-- End: {}".format(self.name))
+        rangelog.logger.info("<-- End: {}".format(self.name))
