@@ -3,8 +3,8 @@ import logging
 
 class rangelog:
     logger = None
-    startlog = "--> Start: {name}"
-    endlog   = "<--   End:" # noqa
+    startmsg = "--> Start: {name}"
+    endmsg   = "<--   End:" # noqa
 
     @classmethod
     def set_logger(cls, logger=None):
@@ -15,14 +15,22 @@ class rangelog:
         elif isinstance(logger, logging.Logger):
             cls.logger = logger
 
+    @classmethod
+    def set_start_msg(cls, msg):
+        cls.startmsg = msg
+
+    @classmethod
+    def set_end_msg(cls, msg):
+        cls.endmsg = msg
+
     def __init__(self, name):
         if rangelog.logger is None:
             rangelog.set_logger()
         self.name = name
 
     def __enter__(self):
-        rangelog.logger.info(rangelog.startlog.format(name=self.name))
+        rangelog.logger.info(rangelog.startmsg.format(name=self.name))
         return rangelog.logger
 
     def __exit__(self, *args):
-        rangelog.logger.info(rangelog.endlog.format(name=self.name))
+        rangelog.logger.info(rangelog.endmsg.format(name=self.name))
