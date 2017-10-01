@@ -44,7 +44,7 @@ train_set: 7000, eval_set: 3000
 ```
 
 
-If you want to use the logger you defined
+### If you want to use the logger you defined
 
 ```python
 def train(args):
@@ -52,6 +52,23 @@ def train(args):
     logger.setLevel(logging.DEBUG)
     logger.addHandler(logging.StreamHandler())
     rangelog.set_logger(logger)
+    with rangelog("creating dataset"):
+        data = TransformDataset(np.loadtxt(args.data_path, dtype=np.float32),
+                                lambda in_data: (in_data[:-1], in_data[-1:]))
+        train_set, eval_set = split_dataset_random(data, len(data)*7//10)
+    with rangelog("creating iterator") as logger:
+        logger.debug("train_set: {}, eval_set: {}".format(len(train_set), len(eval_set)))
+        iterator = SerialIterator(train_set, args.batch, repeat=True)
+        eval_iterator = SerialIterator(eval_set, args.batch, repeat=False)
+    ...
+```
+
+### If you want to set start/end message
+
+```python
+def train(args):
+    rangelog.set_start_msg("start... {name}")
+    rangelog.set_end_msg("  end...")
     with rangelog("creating dataset"):
         data = TransformDataset(np.loadtxt(args.data_path, dtype=np.float32),
                                 lambda in_data: (in_data[:-1], in_data[-1:]))
