@@ -86,6 +86,7 @@ def train(args):
 - SourceBackup: backups source code automatically.
 - ArgumentBackup: backups argparse result.
 - FinalRequest: requests to some url when training finished.
+- SlackPost: posts result to Slack.
 
 ```python
 
