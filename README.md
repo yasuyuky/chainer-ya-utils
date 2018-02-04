@@ -87,6 +87,7 @@ def train(args):
 - ArgumentBackup: backups argparse result.
 - FinalRequest: requests to some url when training finished.
 - SlackPost: posts result to Slack.
+- MemoryUsage: record gpu memory usage.
 
 ```python
 
@@ -107,6 +108,12 @@ def train(args):
         trainer.extend(SlackPost(token, channel))
         url = "https://example.com/webhook"
         trainer.extend(FinalRequest(url, data={"msg": "training finished"}))
+        memory_usage = MemoryUsage()
+        trainer.extend(memory_usage)
+    ...
+    with rangelog("training"):
+        trainer.run()
+    print(max(memory_usage.total))
     ...
 ```
 
