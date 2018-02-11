@@ -81,7 +81,7 @@ def train(args):
 ```
 
 
-## Trainer Extensions ( SourceBackup / ArgumentBackup / FinalRequest / SlackPost )
+## Trainer Extensions ( SourceBackup / ArgumentBackup / FinalRequest / SlackPost / MemoryUsage)
 
 - SourceBackup: backups source code automatically.
 - ArgumentBackup: backups argparse result.
