@@ -1,11 +1,11 @@
-import os
-import requests
 import json
+import os
+
+import requests
 from chainer.training import extension
 
 
 class SlackPost(extension.Extension):
-
     def __init__(self, token, channel, **kwargs):
         self.token = token
         self.channel = channel
@@ -25,8 +25,9 @@ class SlackPost(extension.Extension):
         except:
             pass
         else:
-            self.args = ["{}:\t{}".format(k,getattr(args, k))
-                         for k in vars(args)]
+            self.args = [
+                "{}:\t{}".format(k, getattr(args, k)) for k in vars(args)
+            ]
 
     def finalize(self):
         msgs = ["Training finished"]
@@ -38,10 +39,19 @@ class SlackPost(extension.Extension):
                 "token": self.token,
                 "channels": self.channel,
                 "initial_comment": "\n".join(msgs),
+                "icon_url": "https://chainer.org/images/chainer_icon_red.png",
+                "username": "Chainer Result",
             }
             files = {'file': open(self.plotfilepath, 'rb')}
-            requests.post("https://slack.com/api/files.upload",
-                          data=data, files=files)
+            ret = requests.post(
+                "https://slack.com/api/files.upload", data=data, files=files)
+            obj = ret.json()
+            attachments = [{
+                "fallback": "plot",
+                "color": "good",
+                "title": "Result",
+                "image_url": obj["file"]["url_private"],
+            }]
         else:
             data = {
                 "token": self.token,
@@ -53,5 +63,5 @@ class SlackPost(extension.Extension):
                 "attachments": json.dumps(attachments),
                 "username": "Chainer Result",
             }
-            requests.post("https://slack.com/api/chat.postMessage",
-                          data=data)
+            ret = requests.post(
+                "https://slack.com/api/chat.postMessage", data=data)
