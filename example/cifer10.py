@@ -4,9 +4,6 @@ import argparse
 import logging
 import json
 
-import matplotlib
-matplotlib.use('Agg') # noqa / this should be before numpy/chainer
-
 from chainer.ya.utils import rangelog, SourceBackup, ArgumentBackup, FinalRequest, SlackPost, SamplePairingDataset # noqa
 
 import chainer
