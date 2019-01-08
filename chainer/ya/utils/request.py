@@ -3,7 +3,6 @@ from chainer.training import extension
 
 
 class FinalRequest(extension.Extension):
-
     def __init__(self, url, method="GET", **kwargs):
         self.url = url
         self.method = method

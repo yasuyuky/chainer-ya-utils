@@ -1,9 +1,8 @@
-from chainer.training import extension
 import chainer
+from chainer.training import extension
 
 
 class MemoryUsage(extension.Extension):
-
     def __init__(self, trigger=(1, "epoch")):
         self.total = []
         self.trigger = trigger
@@ -14,7 +13,7 @@ class MemoryUsage(extension.Extension):
 
     def __call__(self, _):
         if chainer.cuda.available:
-            total = chainer.cuda.memory_pool.total_bytes()/(1024*1024)
+            total = chainer.cuda.memory_pool.total_bytes() / (1024 * 1024)
             self.total.append(total)
 
     def finalize(self):

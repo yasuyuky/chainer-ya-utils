@@ -4,7 +4,7 @@ import logging
 class rangelog:
     logger = None
     startmsg = "--> Start: {name}"
-    endmsg   = "<--   End:" # noqa
+    endmsg = "<--   End:"  # noqa
 
     @classmethod
     def set_logger(cls, logger=None):

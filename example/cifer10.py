@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 
 import argparse
-import logging
 import json
-
-from chainer.ya.utils import rangelog, SourceBackup, ArgumentBackup, FinalRequest, SlackPost, SamplePairingDataset # noqa
+import logging
 
 import chainer
 from chainer import functions as F
 from chainer import links as L
-from chainer import optimizers
-from chainer import training
+from chainer import optimizers, training
 from chainer.datasets import get_cifar10
+from chainer.iterators.serial_iterator import SerialIterator
 from chainer.training import StandardUpdater, extensions
 from chainer.training.extensions import snapshot_object
 from chainer.training.triggers import MinValueTrigger
-from chainer.iterators.serial_iterator import SerialIterator
+from chainer.ya.utils import (ArgumentBackup, SamplePairingDataset, SlackPost,
+                              SourceBackup, rangelog)
 
 
 class Conv(chainer.Chain):
@@ -23,10 +22,10 @@ class Conv(chainer.Chain):
         super(Conv, self).__init__()
         with self.init_scope():
             for i in range(n_layers):
-                setattr(self, "c"+str(i), L.Convolution2D(None,n_units,
-                                                          ksize=3, pad=1))
-                setattr(self, "bn"+str(i), L.BatchNormalization(n_units))
-            self.l = L.Linear(None,n_out)
+                setattr(self, "c" + str(i),
+                        L.Convolution2D(None, n_units, ksize=3, pad=1))
+                setattr(self, "bn" + str(i), L.BatchNormalization(n_units))
+            self.l = L.Linear(None, n_out)
         self.n_units = n_units
         self.n_out = n_out
         self.n_layers = n_layers
@@ -34,19 +33,20 @@ class Conv(chainer.Chain):
     def predict(self, x):
         h = x
         for i in range(self.n_layers):
-            h = F.relu(getattr(self,"bn"+str(i))(getattr(self,"c"+str(i))(h)))
+            h = F.relu(
+                getattr(self, "bn" + str(i))(getattr(self, "c" + str(i))(h)))
         return self.l(h)
 
     def __call__(self, x, t):
         loss = F.softmax_cross_entropy(self.predict(x), t)
-        chainer.report({'loss': loss/t.shape[0]}, self)
+        chainer.report({'loss': loss / t.shape[0]}, self)
         return loss
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-S", "--sample_pairing", action="store_true",
-                        default=False)
+    parser.add_argument(
+        "-S", "--sample_pairing", action="store_true", default=False)
     parser.add_argument("--model_path", default='model.npz')
     parser.add_argument("-e", "--epoch", type=int, default=10)
     parser.add_argument("-b", "--batch", type=int, default=500)
@@ -54,8 +54,8 @@ def parse_args():
     parser.add_argument("--device", type=int, default=0)
     parser.add_argument("--report_keys", action="append", default=['loss'])
     args = parser.parse_args()
-    args.report_keys = ['main/'+k for k in args.report_keys]
-    args.report_keys += ['validation/'+k for k in args.report_keys]
+    args.report_keys = ['main/' + k for k in args.report_keys]
+    args.report_keys += ['validation/' + k for k in args.report_keys]
     return args
 
 
@@ -73,8 +73,8 @@ def train(args):
             train_set = SamplePairingDataset(train_set)
 
     with rangelog("creating iterator") as logger:
-        logger.info("train_set: {}, eval_set: {}"
-                    .format(len(train_set), len(eval_set)))
+        logger.info("train_set: {}, eval_set: {}".format(
+            len(train_set), len(eval_set)))
         iterator = SerialIterator(train_set, args.batch, repeat=True)
         eval_iterator = SerialIterator(eval_set, args.batch, repeat=False)
 
@@ -89,16 +89,15 @@ def train(args):
         optimizer.setup(model)
 
     with rangelog("creating trainer"):
-        updater = StandardUpdater(iterator=iterator,
-                                  optimizer=optimizer,
-                                  device=args.device)
-        trainer = training.Trainer(updater, (args.epoch, 'epoch'),
-                                   out=args.store)
+        updater = StandardUpdater(
+            iterator=iterator, optimizer=optimizer, device=args.device)
+        trainer = training.Trainer(
+            updater, (args.epoch, 'epoch'), out=args.store)
 
     with rangelog("trainer extension") as logger:
-        trainer.extend(extensions.Evaluator(iterator=eval_iterator,
-                                            target=model,
-                                            device=args.device))
+        trainer.extend(
+            extensions.Evaluator(
+                iterator=eval_iterator, target=model, device=args.device))
         trainer.extend(extensions.LogReport())
         trainer.extend(SourceBackup())
         trainer.extend(ArgumentBackup(args))
@@ -108,10 +107,11 @@ def train(args):
             logger.warn("Error {}".format(e))
         else:
             trainer.extend(SlackPost(slack["token"], slack["channel"]))
-        trainer.extend(extensions.PrintReport(['epoch']+args.report_keys))
+        trainer.extend(extensions.PrintReport(['epoch'] + args.report_keys))
         trainer.extend(extensions.ProgressBar(update_interval=1))
-        trainer.extend(extensions.PlotReport(args.report_keys, 'epoch',
-                                             file_name='plot.png'))
+        trainer.extend(
+            extensions.PlotReport(
+                args.report_keys, 'epoch', file_name='plot.png'))
         trigger = MinValueTrigger(key='validation/main/loss')
         snapshoter = snapshot_object(model, filename=args.model_path)
         trainer.extend(snapshoter, trigger=trigger)

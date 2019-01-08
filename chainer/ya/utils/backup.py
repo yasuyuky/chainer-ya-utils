@@ -1,15 +1,14 @@
-import inspect
 import ast
-import os
 import glob
-import shutil
+import inspect
 import json
+import os
+import shutil
 
 from chainer.training import extension
 
 
 class SourceBackup(extension.Extension):
-
     def __init__(self, backupdir=None):
         self.backupdir = backupdir
 
@@ -30,9 +29,9 @@ class SourceBackup(extension.Extension):
             if not name: continue
             name_seq = name.split('.')
             path = os.path.join(os.path.dirname(filepath), *name_seq)
-            if os.path.exists(path+'.py'):
-                self.backup_file(path+'.py')
-                self.retrieve_file(path+'.py')
+            if os.path.exists(path + '.py'):
+                self.backup_file(path + '.py')
+                self.retrieve_file(path + '.py')
             elif os.path.isdir(path):
                 for subpath in glob.glob(os.path.join(path, '*')):
                     self.retrieve_file(subpath)
@@ -64,7 +63,6 @@ class SourceBackup(extension.Extension):
 
 
 class ArgumentBackup(extension.Extension):
-
     def __init__(self, args, filename='args.json', backupdir=None):
         self.args = args
         self.filename = filename
@@ -80,5 +78,5 @@ class ArgumentBackup(extension.Extension):
             if not os.path.exists(self.backupdir):
                 os.makedirs(self.backupdir)
             args_dict = vars(self.args)
-            args = {k:args_dict[k] for k in args_dict}
+            args = {k: args_dict[k] for k in args_dict}
             json.dump(args, f)
